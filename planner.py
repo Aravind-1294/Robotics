@@ -45,10 +45,11 @@ def get_global_path(grid, start, goal, resolution=1.0):
     return []
 
 class APFPlanner:
-    def __init__(self, katt=1.0, krep=100.0, d0=5.0):
-        self.katt = 2.0
-        self.krep = 20.0
-        self.d0 = 3.0
+    def __init__(self, katt=5.0, krep=200.0, d0=4.0, robot_radius=2.2):
+        self.katt = katt
+        self.krep = krep
+        self.d0 = d0
+        self.robot_radius = robot_radius
         
         self.use_hybrid = False
         self.path = []
@@ -84,9 +85,15 @@ class APFPlanner:
         return -self.katt * (robot_pos - target)
 
     def repulsion_force(self, robot_pos, obstacles):
+        """
+        Calculates the total repulsive force by SUMMING forces from all obstacles.
+        This creates smooth, curved trajectories.
+        """
         f_rep = np.zeros(2)
+        
         for obs in obstacles:
             ox, oy, w, h = obs
+            
             closest_x = np.clip(robot_pos[0], ox, ox + w)
             closest_y = np.clip(robot_pos[1], oy, oy + h)
             closest_pt = np.array([closest_x, closest_y])
@@ -94,29 +101,24 @@ class APFPlanner:
             dist_vec = robot_pos - closest_pt
             dist = np.linalg.norm(dist_vec)
             
-            robot_radius = 2.2
-            dist_surface = dist - robot_radius
-            
-            if dist_surface <= 0.001: 
-                obs_center = np.array([ox + w/2, oy + h/2])
-                dist_vec = robot_pos - obs_center
-                dist = np.linalg.norm(dist_vec)
-                if dist < 0.001:
-                    dist_vec = np.array([1.0, 0.0])
-                    dist = 1.0
-                
-                f_dir = dist_vec / dist
-                f_rep += self.krep * 5.0 * f_dir
-                continue
+            dist_surface = dist - self.robot_radius
             
             if dist_surface < self.d0:
+                if dist_surface <= 0.001:
+                    dist_surface = 0.001
+                    
                 f_mag = self.krep * (1.0 / (dist_surface**2))
-                f_dir = dist_vec / dist 
+                
+                if dist > 0:
+                    f_dir = dist_vec / dist
+                else:
+                    f_dir = np.array([1.0, 0.0])
+                    
                 f_rep += f_mag * f_dir
-        
+
         mag = np.linalg.norm(f_rep)
-        if mag > 50.0:
-            f_rep = (f_rep / mag) * 50.0
+        if mag > 500.0:
+            f_rep = (f_rep / mag) * 500.0
             
         return f_rep
 

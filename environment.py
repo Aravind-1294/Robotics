@@ -35,10 +35,6 @@ def load_scenario(name):
         obstacles.append((13, 16, 2, 2))
         obstacles.append((22, 12, 2, 2))
 
-    elif name == 'Corridor':
-        obstacles.append((0, 10, 20, 2))
-        obstacles.append((10, 18, 20, 2))
-
     elif name == 'U-Trap':
         start = np.array([4.0, 4.0])
         goal = np.array([26.0, 26.0])
@@ -56,7 +52,7 @@ def create_occupancy_grid(width, height, obstacles, resolution=1.0):
     grid_h = int(height / resolution)
     grid = np.zeros((grid_w, grid_h), dtype=int)
     
-    margin = 2.5
+    margin = 1.8
     
     for obs in obstacles:
         ox, oy, w, h = obs
