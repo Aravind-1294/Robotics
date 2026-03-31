@@ -49,10 +49,3 @@ project/
 pip install -r requirements.txt
 python main.py
 
- Author
-
-Aravind Gangavarapu
-
- License
-
-MIT License
