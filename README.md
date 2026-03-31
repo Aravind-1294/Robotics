@@ -21,7 +21,6 @@ Robotic systems require precise control, perception, and decision-making to oper
 ##  Tech Stack
 - Python
 - NumPy
-- (Add if used: ROS / OpenCV / PyBullet / Gazebo)
 
 ---
 
